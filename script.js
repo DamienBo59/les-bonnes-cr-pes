@@ -132,9 +132,6 @@ const INGREDIENTS = [
     },
 ];
 
-// === WEAVELY FORM ===
-const WEAVELY_FORM_URL = 'https://forms.weavely.ai/d264b78e-3b54-4f02-bad3-aa1794c74813';
-
 // === DIET FILTER ===
 // IDs des ingredients non-vegan (viande, poisson, oeuf, produits laitiers, miel)
 const NON_VEGAN_IDS = new Set([
@@ -329,6 +326,9 @@ function updateRecap() {
     // Stats
     document.getElementById('stat-count').textContent = items.length;
 
+    // Mobile bar
+    updateMobileBar(items);
+
     // Category counts
     INGREDIENTS.forEach(cat => {
         const countEl = document.querySelector(`.cat-selected[data-cat="${cat.category}"]`);
@@ -453,7 +453,7 @@ function setDiet(diet) {
     showToast(label);
 }
 
-// === SEND TO CHEF ===
+// === SEND TO CHEF (MODAL) ===
 function sendToChef() {
     const items = getSelectedItems();
     if (items.length === 0) {
@@ -464,14 +464,75 @@ function sendToChef() {
     const ingredientList = items.map(i => `${i.emoji} ${i.name}`).join(', ');
     const shareUrl = window.location.href;
 
-    // Copy recap to clipboard for easy paste in form
-    const recap = `Ma galette : ${ingredientList}\nLien : ${shareUrl}`;
-    navigator.clipboard.writeText(recap).then(() => {
-        showToast('Recette copiee ! Colle-la dans le formulaire.');
-    }).catch(() => {});
+    // Remplir le recap dans la modale
+    document.getElementById('modal-recap').textContent = ingredientList;
 
-    // Open Weavely form
-    window.open(WEAVELY_FORM_URL, '_blank');
+    // Remplir les champs caches
+    document.getElementById('form-galette').value = ingredientList;
+    document.getElementById('form-lien').value = shareUrl;
+
+    // Ouvrir la modale
+    document.getElementById('modal-overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget && !event.target.closest('.modal-close')) return;
+    document.getElementById('modal-overlay').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function initForm() {
+    const form = document.getElementById('galette-form');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('btn-submit');
+        btn.disabled = true;
+        btn.textContent = 'Envoi en cours...';
+
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+        }).then(response => {
+            if (response.ok) {
+                closeModal();
+                form.reset();
+                showToast('Galette envoyee au chef !');
+            } else {
+                showToast('Erreur, reessaie !');
+            }
+        }).catch(() => {
+            showToast('Erreur reseau, reessaie !');
+        }).finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer !`;
+        });
+    });
+}
+
+// === MOBILE BAR ===
+function updateMobileBar(items) {
+    const bar = document.getElementById('mobile-bar');
+    if (!bar) return;
+
+    if (items.length > 0) {
+        bar.classList.add('visible');
+        document.getElementById('mobile-bar-count').textContent =
+            `${items.length} ingredient${items.length > 1 ? 's' : ''}`;
+        document.getElementById('mobile-bar-emojis').textContent =
+            items.slice(0, 8).map(i => i.emoji).join('');
+    } else {
+        bar.classList.remove('visible');
+    }
+}
+
+function scrollToRecap() {
+    const recap = document.getElementById('recap');
+    if (recap) {
+        recap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // === GLOBAL EVENTS ===
@@ -480,4 +541,5 @@ function bindGlobalEvents() {
     document.getElementById('btn-share').addEventListener('click', shareGalette);
     document.getElementById('btn-random').addEventListener('click', randomGalette);
     document.getElementById('btn-send').addEventListener('click', sendToChef);
+    initForm();
 }

@@ -107,7 +107,71 @@
         </aside>
     </main>
 
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()" title="Fermer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+            <h3 class="modal-title">Envoyer ma galette</h3>
+            <div class="modal-recap" id="modal-recap"></div>
+            <form id="galette-form" action="https://formspree.io/f/xwvnzjvz" method="POST">
+                <input type="hidden" name="galette" id="form-galette">
+                <input type="hidden" name="lien" id="form-lien">
+                <div class="form-group">
+                    <label for="form-prenom">Prenom</label>
+                    <input type="text" id="form-prenom" name="prenom" required placeholder="Ton prenom">
+                </div>
+                <div class="form-group">
+                    <label for="form-tel">Telephone <span class="form-optional">(facultatif)</span></label>
+                    <input type="tel" id="form-tel" name="telephone" placeholder="06 12 34 56 78">
+                </div>
+                <div class="form-group">
+                    <label class="form-label-cinema">Un cinema avec ta galette ?</label>
+                    <div class="cinema-options">
+                        <label class="cinema-option">
+                            <input type="radio" name="cinema" value="Oui, carrément !" required>
+                            <span class="cinema-chip">Oui, carrement !</span>
+                        </label>
+                        <label class="cinema-option">
+                            <input type="radio" name="cinema" value="Non merci">
+                            <span class="cinema-chip">Non merci</span>
+                        </label>
+                        <label class="cinema-option">
+                            <input type="radio" name="cinema" value="Pourquoi pas">
+                            <span class="cinema-chip">Pourquoi pas</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="form-comment">Un petit mot ? <span class="form-optional">(facultatif)</span></label>
+                    <textarea id="form-comment" name="commentaires" rows="3" placeholder="Une precision, une allergie, un message..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit" id="btn-submit">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                    Envoyer !
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
+
+    <div class="mobile-bar" id="mobile-bar">
+        <div class="mobile-bar-info" id="mobile-bar-info">
+            <span class="mobile-bar-emojis" id="mobile-bar-emojis"></span>
+            <span class="mobile-bar-count" id="mobile-bar-count">0 ingredient</span>
+        </div>
+        <button class="mobile-bar-btn" id="mobile-bar-btn" onclick="scrollToRecap()">
+            Voir ma galette
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        </button>
+    </div>
 
     <footer class="footer">
         <p>Fait avec du beurre sale et du sarrasin. <a href="https://github.com" target="_blank" rel="noopener">Code source</a></p>
